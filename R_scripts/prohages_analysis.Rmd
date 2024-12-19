@@ -1,0 +1,323 @@
+---
+title: "SAGE research"
+author: "Besançon Léo"
+date: "2024-12-03"
+output: html_document
+---
+
+```{r}
+strands <- read.csv("C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/SAGE2024 - Genomes_research_project.csv", header = T)
+head(strands)
+table(strands$Host.tribe)
+strands$Host.tribe <- factor(strands$Host.tribe)
+strands$Host.species <- factor(strands$Host.species)
+strands$Location <- factor(strands$Location)
+table(strands$Location)
+```
+
+```{r}
+library(Biostrings)
+directory <- "C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/RESULTS"
+outdir <- "C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/mega_fasta.fasta"
+strands_list <- list.files(path = directory)
+#strands_list
+#names
+pro_dict <- list()
+combined_fasta <- DNAStringSet()
+for(strand in strands_list){
+  proviruses <- c()
+  name <- strsplit(strand,".fna")[[1]][1]
+  path <- file.path(directory, paste0(name, ".fna_GENOMAD_OUTPUT"),paste0(name, "_find_proviruses"),paste0(name, "_provirus_taxonomy.tsv"))
+  file_fasta <- readLines(file.path(directory, paste0(name, ".fna_GENOMAD_OUTPUT"),paste0(name, "_find_proviruses"),paste0(name, "_provirus.fna")))
+  file_fasta <- readDNAStringSet(file.path(directory, paste0(name, ".fna_GENOMAD_OUTPUT"),paste0(name, "_find_proviruses"),paste0(name, "_provirus.fna")))
+  if (length(file_fasta) > 0) {  # Check if file_fasta is not empty
+    new_headers <- paste0(name, sep = "_", seq_along(file_fasta))
+    names(file_fasta) <- new_headers
+  }
+  
+  does_exist <- file.exists(path)
+  pro_df <- read.table(path ,header = T, sep = "\t")
+  #print(pro_df$seq_name)
+  if(length(pro_df$seq_name) > 0){
+      for(i in pro_df$seq_name){
+      phage <- strsplit(i,"\\|")[[1]][2]
+      print(phage)
+      proviruses <- c(proviruses, phage)
+    }
+    pro_dict[[name]] <- proviruses
+  } else
+    pro_dict[[name]] <- "None"
+
+  combined_fasta <- c(combined_fasta, file_fasta)
+}
+writeXStringSet(combined_fasta, outdir)
+table(unlist(pro_dict))
+```
+```{r}
+directory <- "C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/RESULTS"
+outdir <- "C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/plasmids_fasta.fasta"
+strands_list <- list.files(path = directory)
+#strands_list
+#names
+plasmid_dict <- list()
+combined_fasta <- DNAStringSet()
+for(strand in strands_list){
+  proviruses <- c()
+  name <- strsplit(strand,".fna")[[1]][1]
+  path <- file.path(directory, paste0(name, ".fna_GENOMAD_OUTPUT"),paste0(name, "_summary"),paste0(name, "_plasmid_summary.tsv"))
+
+  file_fasta <- readDNAStringSet(file.path(directory, paste0(name, ".fna_GENOMAD_OUTPUT"),paste0(name, "_summary"),paste0(name, "_plasmid.fna")))
+  if (length(file_fasta) > 0) {  # Check if file_fasta is not empty
+    new_headers <- paste0(name, sep = "_plasmid", seq_along(file_fasta))
+    names(file_fasta) <- new_headers
+  }
+  
+  does_exist <- file.exists(path)
+  pro_df <- read.table(path ,header = T, sep = "\t")
+  #print(pro_df$seq_name)
+  if(length(pro_df$seq_name) > 0){
+      for(i in pro_df$seq_name){
+      phage <- i
+      
+      proviruses <- c(proviruses, phage)
+    }
+    plasmid_dict[[name]] <- proviruses
+  } else
+    plasmid_dict[[name]] <- "None"
+
+  combined_fasta <- c(combined_fasta, file_fasta)
+}
+writeXStringSet(combined_fasta, outdir)
+sum(table(unlist(plasmid_dict)))
+```
+
+
+
+```{r}
+library(pheatmap)
+vir <- read.table("C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/VIRIDIC/VIRIDIC_sim-dist_table.tsv", header = T, sep = "\t", row.names = 1)
+
+matrix_vir <- as.matrix(vir)
+
+
+plas <- read.table("C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/Plasmid_heatmap.tsv", header = T, sep = "\t", row.names = 1)
+
+matrix_plas <- as.matrix(plas)
+
+
+
+
+heat_vir <- heatmap(matrix_vir)
+heat_plas <- heatmap(matrix_plas)
+
+library(colorRamps)
+png("final_heatmap.png", width = 2400, height = 1200, res = 300 )
+# Set the plotting parameters for dark theme
+par(bg = "#212121", col.main = "white", col.axis = "white", col.lab = "white")
+
+# Define the custom color palette using green2red from the colorRamps package
+color_palette <- colorRamps::matlab.like(100)
+
+# Plot the heatmap with the green2red color palette
+heatmap(
+  matrix_vir,                   # Your similarity matrix
+  Rowv = NA,                    # Remove row dendrogram
+  Colv = NA,                    # Remove column dendrogram
+  col = color_palette,          # Use the green2red color palette
+  scale = "none",               # Prevent scaling if it's similarity data
+  main = "Similarity Heatmap", # Add a title
+  xlab = "",                    # Add x-axis label
+  ylab = "",                    # Add y-axis label
+  margins = c(5, 5)             # Adjust margins to fit labels
+)
+
+# Add custom white title (optional, if not handled by `par()`)
+title(main = "", col.main = "white")
+
+# Add a custom legend in white (if needed)
+legend(
+  "topright",                     # Legend position
+  legend = c("1%", "50%", "100%"), # Legend labels
+  fill = color_palette[c(1, 50, 100)], # Matching colors
+  text.col = "white",             # Legend text color
+  bg = "#212121",                 # Legend background
+  border = "white"                # Legend border
+)
+dev.off()
+```
+```{r}
+prevalence <- read.csv("C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/prevalence_final.csv", header = T, sep = ";")
+
+
+
+strain_name <- c()
+for(i in rownames(vir)){
+  strain_name <- c(strain_name, substr(i, 1, nchar(i)-2))
+}
+
+
+prevalence$Strain <- unlist(lapply(prevalence$Strain, function(x) gsub("[-_]","",x)))
+strain_name <- unlist(lapply(strain_name, function(x) gsub("[-_]","",x)))
+
+df_ordered <- prevalence[na.omit(match(strain_name, prevalence$Strain)), ]
+strain_name
+```
+
+
+```{r}
+vir <- vir/100
+diss_vir <- 1-vir
+```
+
+
+```{r}
+mds_coord <- cmdscale(as.dist(diss_vir),k=3, eig = T)
+mds_coord$eig
+
+```
+
+```{r}
+k <- 7
+
+kmeans_result <- kmeans(mds_coord, centers = k)
+print(sort(kmeans_result$cluster))
+```
+```{r}
+cluster_assignments <- kmeans_result$cluster
+
+# Group phages by cluster
+phage_clusters <- split(rownames(vir), cluster_assignments)
+
+# Convert the split list into a data frame
+# Ensure each column is padded to have the same length
+max_length <- max(sapply(phage_clusters, length))
+cluster_dataframe <- do.call(
+  cbind, 
+  lapply(phage_clusters, function(cluster) {
+    length(cluster) <- max_length  # Pad with NA
+    return(cluster)
+  })
+)
+
+# Set column names to represent clusters
+colnames(cluster_dataframe) <- paste0("Cluster_", seq_along(phage_clusters))
+
+# View the result
+print(cluster_dataframe)
+```
+
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+# Create a data frame for plotting
+plot_data <- data.frame(
+  x = mds_coord[, 1],
+  y = mds_coord[, 2],
+  cluster = as.factor(df_ordered$Host.tribe),
+  label = df_ordered$Species
+)
+
+# Plot
+graph <- ggplot(plot_data, aes(x = x, y = y, color = cluster)) +
+  geom_point(size = 3) +
+  geom_text_repel(aes(label = label), size = 4) +
+  labs(title = "Host bee and host bacteria cluster of Phages", x = "MDS Dimension 1", y = "MDS Dimension 2") +
+  theme(
+    plot.background = element_rect(fill = "#212121"),
+    axis.text = element_text(color = "white"),
+    axis.title = element_text(color = "white"),
+    plot.title = element_text(color = "white", hjust = 0.5),
+    legend.background = element_rect(fill = "#212121"),
+    legend.text = element_text(color = "white")
+  )
+graph
+ggsave("phage_cluster_bees_bact.png", plot = graph, width = 12, height = 7, units = "in", dpi = 600)
+```
+
+```{r}
+library(plotly)
+library(htmlwidgets)
+library(magick)
+library(webshot)
+# Sample 3D coordinates and metadata (replace with your actual data)
+plot_data <- data.frame(
+  x = mds_coord[, 1],
+  y = mds_coord[, 2],
+  z = mds_coord[, 3],  # Add the third dimension
+  cluster = as.factor(df_ordered$Host.tribe),  # Cluster variable
+  label = df_ordered$Species  # Labels for points
+)
+
+cluster_colors <- c("Apini" = "#E41A1C",       # Apini - Orange
+                    "Bombini" = "#4DAF4A",      # Bombini - Green
+                    "Meliponini" = "#377EB8",    # Meliponini - Blue
+                    "Outgroup" = "#984EA3")  
+# Create an interactive 3D scatter plot
+plot <- plot_ly(
+  data = plot_data,
+  x = ~x,
+  y = ~y,
+  z = ~z,
+  color = ~cluster,  # Color points by cluster
+  colors = cluster_colors,  # Color palette
+  type = "scatter3d",
+  mode = "markers+text",  # Include both markers and text
+  marker = list(size = 5),  # Adjust marker size
+  text = ~label,  # Add labels to points
+  textposition = "top center"  # Position labels above points
+) %>%
+  layout(
+    title = "3D Host Clustering of Phages",
+    scene = list(
+      xaxis = list(title = "MDS Dimension 1"),
+      yaxis = list(title = "MDS Dimension 2"),
+      zaxis = list(title = "MDS Dimension 3")
+    ),
+    plot_bgcolor = "#212121",  # Match ggplot theme
+    paper_bgcolor = "#212121",  # Match ggplot theme
+    font = list(color = "white")  # White font for text
+  )
+
+# Show the plot
+plot
+htmlwidgets::saveWidget(plot, "C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/3D_scatter_plot.html", selfcontained = TRUE)
+
+```
+
+
+```{r}
+library(factoextra)
+
+# Save the plot as a PNG file with dark mode
+png("elbow_dark_mode.png", width = 1600, height = 1200, res = 400)
+
+fviz_nbclust(mds_coord, kmeans, method = "wss") +
+  labs(title = "Elbow Method for Optimal k") +
+  theme(
+    plot.background = element_rect(fill = "#212121"),  # Set background color
+    panel.background = element_rect(fill = "#212121"),  # Panel background color
+    panel.grid.major = element_line(color = "gray40"),  # Major grid lines
+    panel.grid.minor = element_line(color = "gray30"),  # Minor grid lines
+    axis.text = element_text(color = "white"),          # Axis text color
+    axis.title = element_text(color = "white"),         # Axis title color
+    plot.title = element_text(color = "white", hjust = 0.5),  # Title color and center
+    legend.background = element_rect(fill = "#212121"), # Legend background
+    legend.text = element_text(color = "white"),        # Legend text color
+    legend.title = element_text(color = "white")        # Legend title color
+  )
+
+dev.off()
+```
+
+
+```{r}
+viptree <- read.csv("C:/Users/besan/OneDrive/Bureau/Master MLS/SAGE/VIPTree/results_all/genome_table/genome.tsv", sep = "\t", header =  T, row.names = 1)
+```
+
+
+
+
+
+
+
