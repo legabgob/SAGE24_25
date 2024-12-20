@@ -60,3 +60,14 @@ The output file coming from BACPHLIP was then combined with the metadata table i
 
 We tried to use PyAni to get Average Nucleotide Identity (ANI) comparisons between whole genomes to try and get an idea of the genomic similarities between phages, but we failed to make it work. We tried the `anim` (using MUMMER) and `anib` (using BLAST+) methods. The former reported that we failed to compute at least one pairwise comparison and stopped running, and the latter was strangely no longer implemented in the version of PyAni we tried to use. The script used to try and run this analysis can be found at `run_pyani.sh`.
 
+
+## R analysis
+
+We used R to format the data from the GENOMAD output to a big fasta file with all the phages sequences in it to be able to use as input for other software.
+Then with the Output of VIRIDIC we created a similarity heatmap between the phages that we had.
+Based on the similarity matrix from VIRIDIC we also used multidimensional scaling to get euclidean coordinate to perform kmeans clustering. we used the elbow method to choose the number of cluster. After plotting the results of the kmeans clustering in 2d we labelled the points with metadata such as host tribe and host species to search for clusters. We also plotted it in 3d to better assess some unclustered region of phages.
+The R script used to do that can be found under the folder "R_scripts" with the name `prophages_analysis.rmd`.
+
+## Figures
+
+The figures for the presentation were vectorized using the free and open-source software [Inkscape](https://inkscape.org/).
