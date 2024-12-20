@@ -5,7 +5,7 @@ library(KEGGREST)
 library(ggplot2)
 
 # Load the data
-file_path <- "/home/douhan/Desktop/predicted_genes/genes.bed"  # Replace with your file path
+file_path <- "data/predicted_genes/genes.bed"
 columns <- c("strain", "start", "end", "name", "score", "strand", "name2", "annotation", "WhatIsThis")
 data <- read_tsv(file_path, col_names = columns)
 
@@ -14,7 +14,7 @@ data <- data %>% select(-name2, -WhatIsThis)
 
 # Data Cleaning
 data <- data %>%
-    filter(!is.na(annotation)) %>%                # Remove rows without annotations
+    filter(!is.na(annotation)) %>%                    # Remove rows without annotations
     mutate(annotation = tolower(trimws(annotation)))  # Standardize annotations
 
 # Annotate Genes Using KEGG
@@ -105,21 +105,21 @@ group_counts <- group_counts %>%
 
 # Plot with the updated names
 ggplot(group_counts, aes(x = reorder(functional_group, -count), y = count)) +
-    geom_bar(stat = "identity", fill = "skyblue1") +  # Changed bar color to skyblue1
-    theme_minimal(base_family = "Arial") +  # Retain minimal theme with base font
+    geom_bar(stat = "identity", fill = "skyblue1") +
+    theme_minimal(base_family = "Arial") +
     theme(
-        plot.background = element_rect(fill = "#202020", color = NA),  # Dark background with no border
-        panel.background = element_rect(fill = "#202020", color = NA),  # Panel background with no border
-        panel.grid = element_blank(),  # Remove all grid lines
-        axis.text = element_text(color = "white", size = 16),  # White axis text with increased font size
-        axis.title = element_text(color = "white", size = 16),  # White axis titles with increased font size
-        plot.title = element_text(color = "white", hjust = 0.5, size = 16, face = "bold"),  # Centered and styled title
-        legend.text = element_text(size = 16),  # Increase legend text size if applicable
-        legend.title = element_text(size = 16)  # Increase legend title size if applicable
+        plot.background = element_rect(fill = "#202020", color = NA),
+        panel.background = element_rect(fill = "#202020", color = NA),
+        panel.grid = element_blank(),
+        axis.text = element_text(color = "white", size = 16),
+        axis.title = element_text(color = "white", size = 16),
+        plot.title = element_text(color = "white", hjust = 0.5, size = 16, face = "bold"),
+        legend.text = element_text(size = 16),
+        legend.title = element_text(size = 16)
     ) +
     labs(
-        title = "",  # Centered title
-        x = "Functional Group",  # Adjusted axis title
+        title = "",
+        x = "Functional Group",
         y = "Count"
     )
 
