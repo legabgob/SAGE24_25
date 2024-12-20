@@ -34,9 +34,23 @@ Upon completing this analysis, we realized that the majority of the predicted ge
 
 To address this limitation, we proposed during the presentation that if this project were to be pursued in a real-world context, one of the next steps should involve extending the functional annotation of these genes using AlphaFold3. This approach could provide deeper insights into the structural and functional properties of the unidentified genes, enabling more comprehensive downstream analyses.
 
+## Prophage classification - TaxMyPhage (failed)
+
+TaxmyPhage was installed with the `run_taxmyphage.sh` script and worked. It gave us as an output, the taxonomy of our strains. But, no hits were found with our genomes. We tested where the issue came from and we found that the issue likely comes from the absence of our phages genomes in the databases used by TaxmyPhage. You can find the output of the taxonomy table in the `Summary_taxonomy.tsv`.
+
 ## Lifecycle classification - BACPHLIP
 
 BACPHLIP was installed in a micromamba environment and ran using the `bacphlip.sh` script. As input, it needed all the prophage genome sequences in fasta format, which were obtained from the genomad output and regrouped in a single file (`mega_fasta.fasta`). It then returned as output a combined dataframe containing the probabilities of a phage either being lytic (virulent) or lysogenic (temperate). The result file can be found at `mega_fasta.fasta.bacphlip`. 
+
+## Similarity between phages - [VIRIDIC Web](https://rhea.icbm.uni-oldenburg.de/viridic/)
+
+We used VIRIDIC WEB version to have the output and kept the initial parameters to run the analysis. VIRIDIC (Virus Intergenomic Distance Calculator) computes pairwise intergenomic distances/similarities amongst viral genomes. You can find all the output in the `VIRIDIC.zip` file.
+
+## Proteomic study - [VIPTree Web](https://www.genome.jp/viptree/upload)
+
+We used VIPTree WEB version to have the output and kept the initial parameters to run the analysis.
+VIPTree generates a proteomic tree of viral genome sequences based on genome-wide sequence similarities computed by tBLASTx. It also offers an excellent alignment visualization useful for comparative genomics of viruses. In addition, it can do gene annotation and find protein similarities. You can find the output in the `VIPTree.zip` file. 
+
 
 ## Prevalence analysis
 
@@ -45,6 +59,8 @@ The output file coming from BACPHLIP was then combined with the metadata table i
 ## PyAni
 
 We tried to use PyAni to get Average Nucleotide Identity (ANI) comparisons between whole genomes to try and get an idea of the genomic similarities between phages, but we failed to make it work. We tried the `anim` (using MUMMER) and `anib` (using BLAST+) methods. The former reported that we failed to compute at least one pairwise comparison and stopped running, and the latter was strangely no longer implemented in the version of PyAni we tried to use. The script used to try and run this analysis can be found at `run_pyani.sh`.
+
+## 
 
 ## Figures
 
