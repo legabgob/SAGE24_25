@@ -60,8 +60,3 @@ The output file coming from BACPHLIP was then combined with the metadata table i
 
 We tried to use PyAni to get Average Nucleotide Identity (ANI) comparisons between whole genomes to try and get an idea of the genomic similarities between phages, but we failed to make it work. We tried the `anim` (using MUMMER) and `anib` (using BLAST+) methods. The former reported that we failed to compute at least one pairwise comparison and stopped running, and the latter was strangely no longer implemented in the version of PyAni we tried to use. The script used to try and run this analysis can be found at `run_pyani.sh`.
 
-## 
-
-## Figures
-
-The figures for the presentation were vectorized using the free and open-source software [Inkscape](https://inkscape.org/).
